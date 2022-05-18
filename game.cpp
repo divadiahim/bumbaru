@@ -9,7 +9,6 @@
 #define SCREEN_HEIGHT 1000
 int a[10][10];
 std::vector<int> v;
-
 void int_bg()
 {
     // store random vaues in a vector
@@ -44,7 +43,7 @@ struct bullet
 struct bullet bullets[100];
 float o1 = 0.005;
 float l1 = 15;
-float l2 = 3;
+float l2 = 6;
 Rectangle rect1;
 bool check_collided(Vector2 poz1, int rad1, Vector2 poz2, int rad2)
 {
@@ -52,6 +51,7 @@ bool check_collided(Vector2 poz1, int rad1, Vector2 poz2, int rad2)
     return planet_collision;
 }
 Vector2 bam;
+Vector2 bam2;
 bool ok = false;
 void bullet(Vector2 navaPosition, Vector2 mousePosition)
 {
@@ -89,6 +89,7 @@ void planet_boss(Vector2 ship_poz)
     poz_3.y *= bullets[1].len;
     Vector2Normalize(start_pos);
     DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
+    bam2 = Vector2Add(start_pos, poz_3);
 }
 int main(void)
 {
@@ -99,6 +100,7 @@ int main(void)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib [core] game - gravitas");
     Texture2D planet = LoadTexture("../assets/planets.png");
     Texture2D spaceship = LoadTexture("../assets/spaceship.png");
+    Texture2D asteroid = LoadTexture("../assets/asteroid.png");
     Font font = LoadFont("../assets/pcsenior.ttf");
     int_bg();
     SetTargetFPS(144);
@@ -106,7 +108,9 @@ int main(void)
     // draw a black background
     // variable-initialization
     //--------------------------------------------------------------------------------------
-    int lives_no = 3;
+    float lives_no = 3;
+    bool lost = false;
+    bool won = false;
     int lives_planet = 30;
     float framewidth = planet.width / 50;
     float frameheight = planet.height / 4;
@@ -123,120 +127,154 @@ int main(void)
     int max_frames_w = planet.width / framewidth;
     int max_frames_h = planet.height / frameheight;
     bool planet_collision = false;
+    bool spaceship_collision = false;
     bool last_state = false;
     bool current_state = false;
+    bool current_state2 = false;
+    bool last_state2 = false;
     bool stop = false;
+    float cooldown = 80;
     Vector2 navaPosition = {(float)0, (float)0};
     Vector2 nava_static;
     //--------------------------------------------------------------------------------------
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        DrawText(TextFormat("Mouse: %.1f, %.1f", GetMousePosition().x, GetMousePosition().y), 400, 10, 20, RED);
-        DrawText(TextFormat("Screen Size: %i, %i", SCREEN_WIDTH, SCREEN_HEIGHT), 400, 30, 20, RED);
-        if (IsKeyDown(KEY_D))
-            navaPosition.x += 2.0f;
-        if (IsKeyDown(KEY_A))
-            navaPosition.x -= 2.0f;
-        if (IsKeyDown(KEY_W))
-            navaPosition.y -= 2.0f;
-        if (IsKeyDown(KEY_S))
-            navaPosition.y += 2.0f;
-
-        ClearBackground(RAYBLACK);
-        // DrawLineStrip(line,10,RED);
-        timer += GetFrameTime();
-        if (timer >= 0.02f)
+        if (!lost)
         {
-            frame++;
-            if (frame >= max_frames_w)
+            DrawText(TextFormat("Mouse: %.1f, %.1f", GetMousePosition().x, GetMousePosition().y), 400, 10, 20, RED);
+            DrawText(TextFormat("Screen Size: %i, %i", SCREEN_WIDTH, SCREEN_HEIGHT), 400, 30, 20, RED);
+            if (IsKeyDown(KEY_D))
+                navaPosition.x += 2.0f;
+            if (IsKeyDown(KEY_A))
+                navaPosition.x -= 2.0f;
+            if (IsKeyDown(KEY_W))
+                navaPosition.y -= 2.0f;
+            if (IsKeyDown(KEY_S))
+                navaPosition.y += 2.0f;
+
+            ClearBackground(RAYBLACK);
+            // DrawLineStrip(line,10,RED);
+            timer += GetFrameTime();
+            if (timer >= 0.02f)
             {
-                frame2++;
+                frame++;
+                if (frame >= max_frames_w)
+                {
+                    frame2++;
+                }
+                timer = 0.0f;
             }
-            timer = 0.0f;
-        }
-        frame = frame % max_frames_w;
-        // if(frame2>=max_frames_h)
-        // {
-        //     frame2=0;
-        // }
-        frame2 = frame2 % max_frames_h;
-        //   std::cout<<frame<<" "<<frame2<<std::endl;
-        // DrawCircleV(Vector2{30,30},5,RED);
-        draw_bg();
-        // DrawLine(500, 900, GetMousePosition().x,GetMousePosition().y, RED);
-        DrawFPS(10, 10);
-        // print prssed variable
+            frame = frame % max_frames_w;
+            // if(frame2>=max_frames_h)
+            // {
+            //     frame2=0;
+            // }
+            frame2 = frame2 % max_frames_h;
+            //   std::cout<<frame<<" "<<frame2<<std::endl;
+            // DrawCircleV(Vector2{30,30},5,RED);
+            draw_bg();
+            // DrawLine(500, 900, GetMousePosition().x,GetMousePosition().y, RED);
+            DrawFPS(10, 10);
+            // print prssed variable
 
-        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && prssed == 0)
-        {
-            prssed = 1;
-            PlaySound(fxWav);
-            mousepoz = GetMousePosition();
-           
-        }
-        if (prssed == 1)
-        {
-            timer2 += GetFrameTime();
-            if (timer2 >= 0.02f)
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && prssed == 0)
             {
-                frame3++;
+                prssed = 1;
+                PlaySound(fxWav);
+                mousepoz = GetMousePosition();
+            }
+            if (prssed == 1)
+            {
+                timer2 += GetFrameTime();
+                if (timer2 >= 0.02f)
+                {
+                    frame3++;
+                    timer2 = 0.0f;
+                }
+                if (frame3 < 40)
+                {
+                    bullet(navaPosition, mousepoz);
+                }
+            }
+            if (frame3 > 40)
+            {
+                prssed = 0;
+                frame3 = 0;
                 timer2 = 0.0f;
+                ok = 1;
+                bullets[0].len = 0;
             }
-            if (frame3 < 40)
+
+            timer3 += GetFrameTime();
+            if (timer3 >= 0.02f)
             {
-                bullet(navaPosition, mousepoz);
+                frame4++;
+                timer3 = 0.0f;
             }
-        }
-        if (frame3 > 40)
-        {
-            prssed = 0;
-            frame3 = 0;
-            timer2 = 0.0f;
-            ok = 1;
-            bullets[0].len = 0;
-        }
+            if (frame4 < cooldown)
+            {
+                planet_boss(nava_static);
+            }
+            if (frame4 > cooldown)
+            {
+                prssed = 0;
+                frame4 = 0;
+                timer3 = 0.0f;
+                bullets[1].len = 0;
+                nava_static = navaPosition;
+                PlaySound(fxWav);
+            }
 
-        timer3 += GetFrameTime();
-        if (timer3 >= 0.02f)
-        {
-            frame4++;
-            timer3 = 0.0f;
-        }
-        if (frame4 < 80)
-        {
-            planet_boss(nava_static);
-        }
-        if (frame4 > 80)
-        {
-            prssed = 0;
-            frame4 = 0;
-            timer3 = 0.0f;
-            bullets[1].len = 0;
-            nava_static=navaPosition;
-        }
+            // help me overcome my depression+ge
+            std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
+            DrawTextEx(font, TextFormat("Lives %f", lives_no), Vector2{780, 10}, 30, 1, Color{255, 255, 255, 255});
+            DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
+            DrawRectangleRounded(Rectangle{750, 100, (230 / 30) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
+            planet_collision = check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, 170, bam, 10);
+            spaceship_collision = check_collided(Vector2Add(navaPosition, Vector2{10, 0}), 35, bam2, 10);
 
-        // help me overcome my depression+ge
-        std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
-        DrawTextEx(font, TextFormat("Lives %d", lives_no), Vector2{750, 10}, 30, 1, Color{255, 255, 255, 255});
-        DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
-        DrawRectangleRounded(Rectangle{750, 100, (230 / 30) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
-        planet_collision = check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, 170, bam, 10);
-        current_state = planet_collision;
-        // random value between 0 and 1
-        float rand1 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
-        float rand2 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
-        lives_planet = (current_state && !last_state) ? lives_planet - 1 : lives_planet, last_state = current_state;
-        if (planet_collision)
-            ok = 0;
-        float degrees = calculate_angle(navaPosition);
-        DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH / 3) * (rand1), (SCREEN_HEIGHT / 3) * (rand2), framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
-        DrawTextureTiled(spaceship, Rectangle{framewidth_space * 5, 0, framewidth_space, frameheight_space}, Rectangle{navaPosition.x, navaPosition.y, framewidth_space, frameheight_space}, Vector2{0, 0}, degrees - 90, 1, WHITE);
-        // if (planet_collision)
-        // {
-        //     DrawText("You died!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RED);
-        // }
+            current_state2 = spaceship_collision;
+            lives_no = (current_state2 == last_state2) ? lives_no : (float)lives_no - 0.5f;
+            last_state2 = current_state2;
 
+            DrawText(TextFormat("%d Collided", spaceship_collision), 700, 200, 20, RED);
+            current_state = planet_collision;
+            // random value between 0 and 1
+            float rand1 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
+            float rand2 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
+            lives_planet = (current_state && !last_state) ? lives_planet - 1 : lives_planet, last_state = current_state;
+            if (planet_collision)
+                ok = 0;
+            float degrees = calculate_angle(navaPosition);
+
+
+            DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH / 3) * (rand1), (SCREEN_HEIGHT / 3) * (rand2), framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTextureTiled(spaceship, Rectangle{framewidth_space * 5, 0, framewidth_space, frameheight_space}, Rectangle{navaPosition.x, navaPosition.y, framewidth_space, frameheight_space}, Vector2{0, 0}, degrees - 90, 1, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8, SCREEN_HEIGHT / 1.3, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            if(lives_planet<22) cooldown = cooldown - 0.01f;
+        
+        
+        }
+        if (lives_no == 0)
+        {
+            lost = true;
+            ClearBackground(GRAY);
+            DrawText("You Lost!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
+        }
+        if (lives_planet == 0)
+        {
+            won = true;
+            lost = true;
+        }
+        if (won)
+        {
+            ClearBackground(GRAY);
+            DrawText("You won!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
+        }
         EndDrawing();
     }
 
