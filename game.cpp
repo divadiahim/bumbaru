@@ -153,7 +153,7 @@ int main(void)
         ast[3] = {SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
         for (int i=0;i<4;i++)
         {
-            if (CheckCollisionCircleRec(navaPosition,30,ast[i]))
+            if (CheckCollisionCircleRec(navaPosition,15,ast[i]))
             {
                 lives_no-=0.01;
                 if(navaPosition.x<ast[i].x)
