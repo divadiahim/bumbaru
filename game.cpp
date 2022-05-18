@@ -1,10 +1,10 @@
-
 #include "raylib.h"
 #include "include/raymath.h"
 #include <random>
 #include <cstdlib>
 #include <iostream>
-#define RAYBLACK CLITERAL(Color) { 0, 0, 0, 0 }
+#define RAYBLACK \
+    CLITERAL(Color) { 0, 0, 0, 0 }
 #define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT 1000
 int a[10][10];
@@ -44,14 +44,16 @@ struct bullet
 struct bullet bullets[100];
 float o1 = 0.005;
 float l1 = 15;
+float l2 = 3;
 Rectangle rect1;
-bool check_collided(Vector2 poz1, int rad1, Vector2 poz2,int rad2)
+bool check_collided(Vector2 poz1, int rad1, Vector2 poz2, int rad2)
 {
-        bool planet_collision = CheckCollisionCircles(poz1,  rad1, poz2, rad2);
-        return planet_collision;
+    bool planet_collision = CheckCollisionCircles(poz1, rad1, poz2, rad2);
+    return planet_collision;
 }
 Vector2 bam;
-void bullet(Vector2 navaPosition,Vector2 mousePosition)
+bool ok = false;
+void bullet(Vector2 navaPosition, Vector2 mousePosition)
 {
     static int offset = 1;
     bool planet_collision = false;
@@ -64,18 +66,30 @@ void bullet(Vector2 navaPosition,Vector2 mousePosition)
     for (int i = 0; i < 1; i++)
     {
         bullets[i].len += l1;
-     //   std::cout << bullets[i].len << " " << bullets[i].offset << std::endl;
+        //   std::cout << bullets[i].len << " " << bullets[i].offset << std::endl;
         poz_3.x *= bullets[i].len;
         poz_3.y *= bullets[i].len;
         Vector2Normalize(start_pos);
-      
-        DrawCircleV(Vector2Add(start_pos, poz_3), 10, RED);
-        bam=Vector2Add(start_pos, poz_3);
 
-        //check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},170,Vector2Add(start_pos, poz_3),10);
+        if (ok)
+            DrawCircleV(Vector2Add(start_pos, poz_3), 10, RED);
+        bam = Vector2Add(start_pos, poz_3);
+
+        // check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},170,Vector2Add(start_pos, poz_3),10);
     }
 }
 bool prssed = 0;
+void planet_boss(Vector2 ship_poz)
+{
+    Vector2 start_pos = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2};
+    Vector2 end_pos = {ship_poz.x, ship_poz.y};
+    Vector2 poz_3 = Vector2Normalize(Vector2Subtract(end_pos, start_pos));
+    bullets[1].len += l2;
+    poz_3.x *= bullets[1].len;
+    poz_3.y *= bullets[1].len;
+    Vector2Normalize(start_pos);
+    DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
+}
 int main(void)
 {
     // Initialization
@@ -90,10 +104,10 @@ int main(void)
     SetTargetFPS(144);
     //--------------------------------------------------------------------------------------
     // draw a black background
-    //variable-initialization
+    // variable-initialization
     //--------------------------------------------------------------------------------------
     int lives_no = 3;
-    int lives_planet = 10;
+    int lives_planet = 30;
     float framewidth = planet.width / 50;
     float frameheight = planet.height / 4;
     float framewidth_space = spaceship.width / 18;
@@ -103,13 +117,17 @@ int main(void)
     int frame2 = 0;
     float timer2 = 0.0f;
     int frame3 = 0;
+    int frame4 = 0;
+    float timer3 = 0;
     Vector2 mousepoz;
     int max_frames_w = planet.width / framewidth;
     int max_frames_h = planet.height / frameheight;
     bool planet_collision = false;
     bool last_state = false;
     bool current_state = false;
+    bool stop = false;
     Vector2 navaPosition = {(float)0, (float)0};
+    Vector2 nava_static;
     //--------------------------------------------------------------------------------------
     while (!WindowShouldClose())
     {
@@ -148,14 +166,14 @@ int main(void)
         draw_bg();
         // DrawLine(500, 900, GetMousePosition().x,GetMousePosition().y, RED);
         DrawFPS(10, 10);
-        //print prssed variable
-    
-       
+        // print prssed variable
+
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && prssed == 0)
         {
             prssed = 1;
             PlaySound(fxWav);
-            mousepoz= GetMousePosition();
+            mousepoz = GetMousePosition();
+           
         }
         if (prssed == 1)
         {
@@ -175,27 +193,50 @@ int main(void)
             prssed = 0;
             frame3 = 0;
             timer2 = 0.0f;
+            ok = 1;
             bullets[0].len = 0;
         }
-        
-        //help me overcome my depression+ge
-        std::cout<<lives_planet<<std::endl;
-        DrawTextEx(font, TextFormat("Lives %d",lives_no), Vector2 {750,10}, 30, 1, Color {255,255,255,255}); 
-        DrawRectangleRoundedLines(Rectangle{750,100,230,50}, 0.7, 4,4, Color {70,52,235,255});
-        DrawRectangleRounded(Rectangle{750,100,(230/10)*(float)lives_planet,50}, 0.7, 4, Color {70,52,235,255});
-        planet_collision=check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},170,bam,10);
-        current_state  = planet_collision;
-        //random value between 0 and 1
-        float rand1= (planet_collision)?(((float)rand() / (float)RAND_MAX)/1)*(1-0.85)+0.85 :1;
-        float rand2= (planet_collision)?(((float)rand() / (float)RAND_MAX)/1)*(1-0.85)+0.85 :1;
-        lives_planet = (current_state && !last_state)?lives_planet-1:lives_planet,last_state=current_state;
+
+        timer3 += GetFrameTime();
+        if (timer3 >= 0.02f)
+        {
+            frame4++;
+            timer3 = 0.0f;
+        }
+        if (frame4 < 80)
+        {
+            planet_boss(nava_static);
+        }
+        if (frame4 > 80)
+        {
+            prssed = 0;
+            frame4 = 0;
+            timer3 = 0.0f;
+            bullets[1].len = 0;
+            nava_static=navaPosition;
+        }
+
+        // help me overcome my depression+ge
+        std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
+        DrawTextEx(font, TextFormat("Lives %d", lives_no), Vector2{750, 10}, 30, 1, Color{255, 255, 255, 255});
+        DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
+        DrawRectangleRounded(Rectangle{750, 100, (230 / 30) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
+        planet_collision = check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2}, 170, bam, 10);
+        current_state = planet_collision;
+        // random value between 0 and 1
+        float rand1 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
+        float rand2 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
+        lives_planet = (current_state && !last_state) ? lives_planet - 1 : lives_planet, last_state = current_state;
+        if (planet_collision)
+            ok = 0;
         float degrees = calculate_angle(navaPosition);
-        DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH /3)*(rand1) , (SCREEN_HEIGHT / 3)*(rand2) , framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
+        DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH / 3) * (rand1), (SCREEN_HEIGHT / 3) * (rand2), framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
         DrawTextureTiled(spaceship, Rectangle{framewidth_space * 5, 0, framewidth_space, frameheight_space}, Rectangle{navaPosition.x, navaPosition.y, framewidth_space, frameheight_space}, Vector2{0, 0}, degrees - 90, 1, WHITE);
-            // if (planet_collision)
-            // {
-            //     DrawText("You died!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RED);
-            // }
+        // if (planet_collision)
+        // {
+        //     DrawText("You died!", SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 20, RED);
+        // }
+
         EndDrawing();
     }
 
