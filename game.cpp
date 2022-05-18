@@ -108,6 +108,7 @@ int main(void)
     // draw a black background
     // variable-initialization
     //--------------------------------------------------------------------------------------
+    int i = 0;
     float lives_no = 3;
     bool lost = false;
     bool won = false;
@@ -133,24 +134,59 @@ int main(void)
     bool current_state2 = false;
     bool last_state2 = false;
     bool stop = false;
+    bool reached = false;
     float cooldown = 80;
     Vector2 navaPosition = {(float)0, (float)0};
     Vector2 nava_static;
+    std::vector<float> asteroids;
+    for (float i = -10.5; i <= 10.5; i += 0.5)
+    {
+        asteroids.push_back(i);
+    }
     //--------------------------------------------------------------------------------------
+    Rectangle ast[4];
     while (!WindowShouldClose())
     {
+        ast[0] = {SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 8, (float)asteroid.width / 50, (float)asteroid.height};
+        ast[1] = {SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
+        ast[2] = {SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 1.3, (float)asteroid.width / 50, (float)asteroid.height};
+        ast[3] = {SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
+        for (int i=0;i<4;i++)
+        {
+            if (CheckCollisionCircleRec(navaPosition,30,ast[i]))
+            {
+                lives_no-=0.01;
+                if(navaPosition.x<ast[i].x)
+                {
+                    navaPosition.x-=3.1;
+                }
+                if(navaPosition.x>ast[i].x)
+                {
+                    navaPosition.x+=3.1;
+                }
+                if(navaPosition.y<ast[i].y)
+                {
+                    navaPosition.y-=3.1;
+                }
+                if(navaPosition.y>ast[i].y)
+                {
+                    navaPosition.y+=3.1;
+                }
+                
+            }
+        } 
         BeginDrawing();
         if (!lost)
         {
             DrawText(TextFormat("Mouse: %.1f, %.1f", GetMousePosition().x, GetMousePosition().y), 400, 10, 20, RED);
             DrawText(TextFormat("Screen Size: %i, %i", SCREEN_WIDTH, SCREEN_HEIGHT), 400, 30, 20, RED);
-            if (IsKeyDown(KEY_D))
+            if (IsKeyDown(KEY_D) && navaPosition.x < SCREEN_WIDTH - framewidth_space)
                 navaPosition.x += 2.0f;
-            if (IsKeyDown(KEY_A))
+            if (IsKeyDown(KEY_A) && navaPosition.x > 0)
                 navaPosition.x -= 2.0f;
-            if (IsKeyDown(KEY_W))
+            if (IsKeyDown(KEY_W) && navaPosition.y > 0)
                 navaPosition.y -= 2.0f;
-            if (IsKeyDown(KEY_S))
+            if (IsKeyDown(KEY_S)&& navaPosition.y < SCREEN_HEIGHT - frameheight_space)
                 navaPosition.y += 2.0f;
 
             ClearBackground(RAYBLACK);
@@ -227,7 +263,8 @@ int main(void)
             }
 
             // help me overcome my depression+ge
-            std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
+            // std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
+            std::cout << asteroids[i] << std::endl;
             DrawTextEx(font, TextFormat("Lives %f", lives_no), Vector2{780, 10}, 30, 1, Color{255, 255, 255, 255});
             DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
             DrawRectangleRounded(Rectangle{750, 100, (230 / 30) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
@@ -247,19 +284,33 @@ int main(void)
             if (planet_collision)
                 ok = 0;
             float degrees = calculate_angle(navaPosition);
-
-
             DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH / 3) * (rand1), (SCREEN_HEIGHT / 3) * (rand2), framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
             DrawTextureTiled(spaceship, Rectangle{framewidth_space * 5, 0, framewidth_space, frameheight_space}, Rectangle{navaPosition.x, navaPosition.y, framewidth_space, frameheight_space}, Vector2{0, 0}, degrees - 90, 1, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8, SCREEN_HEIGHT / 1.3, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width/50)*frame, (float)(asteroid.height), (float)asteroid.width/50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8, (float)asteroid.width/50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
-            if(lives_planet<22) cooldown = cooldown - 0.01f;
-        
-        
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 8, (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 1.3, (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            if (lives_planet < 22)
+                cooldown = cooldown - 0.01f;
+            // increment and decrement i in a loop
+            if (i < 42 && reached == 0)
+            {
+                i++;
+            }
+            if (i == 42 && reached == 0)
+            {
+                reached = 1;
+            }
+            if (i <= 42 && reached == 1)
+            {
+                i--;
+            }
+            if (i == 0 && reached == 1)
+            {
+                reached = 0;
+            }
         }
-        if (lives_no == 0)
+        if (lives_no <= 0.9)
         {
             lost = true;
             ClearBackground(GRAY);
