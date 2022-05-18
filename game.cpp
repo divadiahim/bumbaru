@@ -320,11 +320,24 @@ int main(void)
         }
         //--------------------------------------------------------------------------------------
         // win-lose
-        if (lives_no <= 0.9)
+        if (lives_no <= 0.99)
         {
             lost = true;
             ClearBackground(GRAY);
             DrawText("You Lost!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
+            DrawText("Click to replay", SCREEN_WIDTH / 3.6, SCREEN_HEIGHT / 3.9, 60, RED);
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            {
+                lost = false;
+                lives_no = 3;
+                cooldown = 80;
+                lives_planet = 30;
+                ok = 1;
+                reached = 0;
+                i = 0;
+                navaPosition.x=0;
+                navaPosition.y=0;
+            }
         }
         if (lives_planet == 0)
         {
@@ -335,6 +348,19 @@ int main(void)
         {
             ClearBackground(GRAY);
             DrawText("You won!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
+            DrawText("Click to replay", SCREEN_WIDTH / 3.6, SCREEN_HEIGHT / 3.9, 60, RED);
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            {
+                lost = false;
+                lives_no = 3;
+                cooldown = 80;
+                lives_planet = 30;
+                ok = 1;
+                reached = 0;
+                i = 0;
+                navaPosition.x=0;
+                navaPosition.y=0;
+            }
         }
         // win-lose-end
         //--------------------------------------------------------------------------------------
