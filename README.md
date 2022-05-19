@@ -1,6 +1,4 @@
-# Project Title
-
-Gravitas
+# Gravitas
 
 ## Description
 
