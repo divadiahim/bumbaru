@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include "include/raymath.h"
 #include <random>
-#include <cstdlib>
 #include <iostream>
 #define RAYBLACK \
     CLITERAL(Color) { 0, 0, 0, 0 }
@@ -51,6 +50,7 @@ bool check_collided(Vector2 poz1, int rad1, Vector2 poz2, int rad2)
 Vector2 bam;
 Vector2 bam2;
 bool ok = false;
+bool ok2 = false;
 void bullet(Vector2 navaPosition, Vector2 mousePosition)
 {
     static int offset = 1;
@@ -86,7 +86,7 @@ void planet_boss(Vector2 ship_poz)
     poz_3.x *= bullets[1].len;
     poz_3.y *= bullets[1].len;
     Vector2Normalize(start_pos);
-    DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
+    if(ok2)DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
     bam2 = Vector2Add(start_pos, poz_3);
 }
 int main(void)
@@ -95,6 +95,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     InitAudioDevice();
     Sound fxWav = LoadSound("../assets/sf_laser_15.mp3");
+    Sound explosion = LoadSound("../assets/explosion.wav");
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib [core] game - gravitas");
     Texture2D planet = LoadTexture("../assets/planets.png");
     Texture2D spaceship = LoadTexture("../assets/spaceship.png");
@@ -107,7 +108,7 @@ int main(void)
     // variable-initialization
     //--------------------------------------------------------------------------------------
     int i = 0;
-    float lives_no = 3;
+    float lives_no = 5;
     bool lost = false;
     bool won = false;
     int lives_planet = 30;
@@ -134,11 +135,11 @@ int main(void)
     bool stop = false;
     bool reached = false;
     float cooldown = 80;
-    Vector2 navaPosition = {(float)0, (float)0};
+    Vector2 navaPosition = {(float)10, (float)10};
     Vector2 nava_static;
     std::vector<float> asteroids;
     
-    for (float i = -10.5; i <= 10.5; i += 0.5)
+    for (float i = -80.5; i <= 80.5; i += 1)
     {
         asteroids.push_back(i);
     }
@@ -149,7 +150,7 @@ int main(void)
         //--------------------------------------------------------------------------------------
         // rectangle colision(asteroid)
         ast[0] = {SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 8, (float)asteroid.width / 50, (float)asteroid.height};
-        ast[1] = {SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
+        ast[1] = {SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5f + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
         ast[2] = {SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 1.3, (float)asteroid.width / 50, (float)asteroid.height};
         ast[3] = {SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height};
         for (int i = 0; i < 4; i++)
@@ -250,6 +251,7 @@ int main(void)
                 prssed = 0;
                 frame4 = 0;
                 timer3 = 0.0f;
+                ok2 = 1;
                 bullets[1].len = 0;
                 nava_static = navaPosition;
                 PlaySound(fxWav);
@@ -261,7 +263,7 @@ int main(void)
             // std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
             //--------------------------------------------------------------------------------------
             // ui
-            std::cout << asteroids[i] << std::endl;
+           // std::cout << asteroids[i] << std::endl;
             DrawTextEx(font, TextFormat("Lives %f", lives_no), Vector2{780, 10}, 30, 1, Color{255, 255, 255, 255});
             DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
             DrawRectangleRounded(Rectangle{750, 100, (230 / 30.0f) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
@@ -289,7 +291,9 @@ int main(void)
             float rand2 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
             lives_planet = (current_state && !last_state) ? lives_planet - 1 : lives_planet, last_state = current_state;
             if (planet_collision)
-                ok = 0;
+                ok = 0,PlaySound(explosion);
+            if(spaceship_collision)
+                ok2 = 0,PlaySound(explosion);
             float degrees = calculate_angle(navaPosition);
             // colision&ui-end
             //--------------------------------------------------------------------------------------
@@ -298,8 +302,8 @@ int main(void)
             // assets
             DrawTexturePro(planet, Rectangle{framewidth * frame, frameheight * frame2, framewidth, frameheight}, Rectangle{(SCREEN_WIDTH / 3) * (rand1), (SCREEN_HEIGHT / 3) * (rand2), framewidth * 3, frameheight * 3}, Vector2{0.5, 0.5}, 0, WHITE);
             DrawTextureTiled(spaceship, Rectangle{framewidth_space * 5, 0, framewidth_space, frameheight_space}, Rectangle{navaPosition.x, navaPosition.y, framewidth_space, frameheight_space}, Vector2{0, 0}, degrees - 90, 1, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 8, (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
-            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.3, SCREEN_HEIGHT / 1.5 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
+            DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.3f + asteroids[i], SCREEN_HEIGHT / 1.5f + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
             DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 8 + asteroids[i], SCREEN_HEIGHT / 1.3, (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
             DrawTexturePro(asteroid, Rectangle{(float)(asteroid.width / 50) * frame, (float)(asteroid.height), (float)asteroid.width / 50, (float)asteroid.height}, Rectangle{SCREEN_WIDTH / 1.2, SCREEN_HEIGHT / 8 + asteroids[i], (float)asteroid.width / 50, (float)asteroid.height}, Vector2{0.5, 0.5}, 0, WHITE);
             // assets-end
@@ -308,15 +312,15 @@ int main(void)
             if (lives_planet < 22)
                 cooldown = cooldown - 0.01f;
             // increment and decrement i in a loop
-            if (i < 42 && reached == 0)
+            if (i < 161 && reached == 0)
             {
                 i++;
             }
-            if (i == 42 && reached == 0)
+            if (i == 161 && reached == 0)
             {
                 reached = 1;
             }
-            if (i <= 42 && reached == 1)
+            if (i <= 161 && reached == 1)
             {
                 i--;
             }
@@ -332,11 +336,11 @@ int main(void)
             lost = true;
             ClearBackground(GRAY);
             DrawText("You Lost!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
-            DrawText("Click to replay", SCREEN_WIDTH / 3.6, SCREEN_HEIGHT / 3.9, 60, RED);
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            DrawText("Press enter to replay", SCREEN_WIDTH / 5, SCREEN_HEIGHT / 3.9, 60, RED);
+            if(IsKeyPressed(KEY_ENTER))
             {
                 lost = false;
-                lives_no = 3;
+                lives_no = 5;
                 cooldown = 80;
                 lives_planet = 30;
                 ok = 1;
@@ -355,8 +359,8 @@ int main(void)
         {
             ClearBackground(GRAY);
             DrawText("You won!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
-            DrawText("Click to replay", SCREEN_WIDTH / 3.6, SCREEN_HEIGHT / 3.9, 60, RED);
-            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
+            DrawText("Press enter to replay", SCREEN_WIDTH / 5, SCREEN_HEIGHT / 3.9, 60, RED);
+            if(IsKeyPressed(KEY_ENTER))
             {
                 lost = false;
                 won = false;
@@ -366,7 +370,6 @@ int main(void)
                 ok = 1;
                 reached = 0;
                 i = 0;
-
                 navaPosition.x=0;
                 navaPosition.y=0;
             }

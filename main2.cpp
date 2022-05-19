@@ -1,4 +1,3 @@
-
 #include "include/raylib.h"
 #define PHYSAC_IMPLEMENTATION
 #include "include/physac.h"
@@ -174,7 +173,7 @@ int main(void)
             MovePlanet();
             BeginDrawing();
                 ClearBackground(BLACK);
-                DrawText("GAME TITLE", screenWidth/2 - 90, screenHeight/2 - 100, 30, LIME);
+                DrawText("GRAVITAS", screenWidth/2 - 90, screenHeight/2 - 100, 30, LIME);
                 DrawText("Powered by zenCode", screenWidth - 120,  screenHeight - 15, 10, WHITE);
                 DrawText("Press Enter to start the game!", screenWidth/2, 3 * screenHeight/4, 20, LIGHTGRAY);
                  draw_bg();
