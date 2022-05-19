@@ -18,9 +18,7 @@ int mihaiGame = 0;
 void UpdatePlayer(PhysicsBody player, PhysicsBody platforms, int envItemsLength, float delta);
 
 void UpdateCameraCenter(Camera2D *camera, PhysicsBody *player, PhysicsBody platforms, int envItemsLength, float delta, int Screenwidth, int Screenheight);
-/// void UpdatePlayer(PhysicsBody player, EnvItem *envItems, int envItemsLength, float delta);
 
-/// void UpdateCameraCenter(Camera2D *camera, PhysicsBody *player, EnvItem *envItems, int envItemsLength, float delta, int width, int height);
 Vector2 platformPos = Vector2{Width / 2.0f, (float)limit};
 PhysicsBody platforms[] = {
     CreatePhysicsBodyRectangle(Vector2{500, 950}, 500, 100, 10), /// base
@@ -34,26 +32,7 @@ PhysicsBody platforms[] = {
     CreatePhysicsBodyRectangle(Vector2{0,}, , , );*/
 };
 PhysicsBody player = CreatePhysicsBodyCircle(Vector2{500, 900}, 30, 10);
-// PhysicsBody arrive = CreatePhysicsBodyCircle(Vector2{ 500, -520}, 600, 10);
 
-/*PhysicsBody Base = CreatePhysicsBodyRectangle(Vector2{ 500, 850}, 500, 100, 10);///base
-PhysicsBody Floor1 = CreatePhysicsBodyRectangle(Vector2{ 0, 400 }, 800, 50, 10);///1
-PhysicsBody Floor2 = CreatePhysicsBodyRectangle(Vector2{ 700, 200 }, 400, 50, 10);///2*/
-// PhysicsBody Floor3 = CreatePhysicsBodyRectangle(platformPos, 800, 100, 10);
-// PhysicsBody Floor4 = CreatePhysicsBodyRectangle(platformPos, 800, 100, 10);
-// PhysicsBody Floor5 = CreatePhysicsBodyRectangle(platformPos, 800, 100, 10);
-
-/*Camera2D camera;
-camera->target = player->position;
-camera.offset = (Vector2){screenWidth/2.0f, screenHeight/2.0f};
-camera.rotation = 0.0f;
-camera.zoom = 1.0f;
-
-void (*cameraUpdaters[])(Camera2D*, player, platforms, int, float, int, int) = {
-        UpdateCameraCenter,
-    };
-int cameraOption = 0;
-    int cameraUpdatersLength = sizeof(cameraUpdaters)/sizeof(cameraUpdaters[0]);*/
 void DrawAllBodies()
 {
     int bodiesCount = GetPhysicsBodiesCount();
@@ -90,18 +69,18 @@ void VerticalMove()
         player->velocity.y = -1;
 }
 
-float offset = 0;
+float offset1 = 0, offset2 = 0;
 void MovePlatform()
 {
-    offset += PI / 100;
-    if (offset == 10 * PI)
-        offset = 0;
+    offset1 += PI / 100;
+    if (offset1 == 10 * PI)
+        offset1 = 0;
     for (int i = 1; i < 5; i++)
     {
         if (i % 2 == 0)
-            platforms[i]->velocity.y = 0.15 * (float)sin(offset); /// doar pt ce se misca <3
+            platforms[i]->velocity.y = 0.15 * (float)sin(offset1); /// doar pt ce se misca <3
         else
-            platforms[i]->velocity.y = -0.15 * (float)sin(offset); /// doar pt ce se misca <3
+            platforms[i]->velocity.y = -0.15 * (float)sin(offset1); /// doar pt ce se misca <3
     }
 }
 std::vector<int> v;
@@ -120,6 +99,17 @@ void draw_bg()
         DrawCircleV(Vector2{(float)(v[i] * 10), (float)(v[i + 1] * 10)}, 2, WHITE);
     }
 }
+
+void MovePlanet(){
+    offset2 += PI / 100;
+    if(offset2 == 10 * PI) offset2 = 0; 
+}
+
+
+
+
+
+
 // main loop:
 int main(void)
 {
@@ -134,14 +124,19 @@ int main(void)
         platforms[i]->freezeOrient = true;
         platforms[i]->staticFriction = platforms[i]->dynamicFriction = 0;
         platforms[i]->useGravity = false;
-        // if(CheckCollisionCircleRec(player->position, 30, platforms[i]))
-        ///!!link Mihai's game here
+
     }
     platforms[0]->enabled = false;
     // arrive->enabled = false;
     Texture2D planets = LoadTexture("../assets/planets.png");
+    bool EnterPressed = false; 
+    Texture2D texture = LoadTexture("../assets/planetAnim.png");
+    Rectangle frameRec = { 0.0f, 0.0f, (float)texture.width/50, (float)texture.height};
+     int currentFrame = 0;
+    int framesCounter = 0;
     while (!WindowShouldClose())
     {
+        if(EnterPressed){
         draw_bg();
         for (int i = 0; i < 5; i++)
         {
@@ -152,8 +147,7 @@ int main(void)
         Strafe();
         MovePlatform();
         BeginDrawing();
-        ClearBackground(BLACK);
-        /// BeginMode2D(camera);
+        ClearBackground(BLACK); 
         DrawTexturePro(planets, Rectangle{(float)(planets.width / 50), (float)(planets.height / 4), (float)(planets.width / 50), (float)(planets.height / 4)}, Rectangle{(float)(650), (float)(-550), (float)(planets.width / 50) * 7, (float)(planets.height / 4) * 7}, Vector2{500, 0}, 0, WHITE);
         if (CheckCollisionPointRec(player->position, Rectangle{150, 0, 700, 110}))
         {
@@ -166,17 +160,31 @@ int main(void)
         DrawText("-> to slide to the right", 600, 740, 30, LIGHTGRAY);
         DrawText("\\|/ to descend", 600, 780, 30, LIGHTGRAY);
         DrawText("<- to slide to the left", 600, 820, 30, LIGHTGRAY);
-        /// EndMode2D();
         EndDrawing();
+        }
+        else {
+            framesCounter++;
+        if (framesCounter >= (10))
+        {
+            framesCounter = 0;
+            currentFrame++;
+            if (currentFrame > 49) currentFrame = 0;
+            frameRec.x = (float)currentFrame*(float)texture.width/50;
+        }
+            MovePlanet();
+            BeginDrawing();
+                ClearBackground(BLACK);
+                DrawText("GAME TITLE", screenWidth/2 - 90, screenHeight/2 - 100, 30, LIME);
+                DrawText("Powered by zenCode", screenWidth - 120,  screenHeight - 15, 10, WHITE);
+                DrawText("Press Enter to start the game!", screenWidth/2, 3 * screenHeight/4, 20, LIGHTGRAY);
+                 draw_bg();
+                DrawTextureRec(texture, frameRec, Vector2{30 , screenHeight/2 + 10 * (float)sin(offset2)} , WHITE);
+            EndDrawing();
+            if(IsKeyPressed(KEY_ENTER))EnterPressed = true;
+        }
     }
     ClosePhysics();
-    // UnloadTexture(planets);
     CloseWindow();
-    /*
-    void UpdateCameraCenter(Camera2D *camera, PhysicsBody player, int width, int height)
-    {
-        camera->offset = (Vector2){Screenwidth/2.0f, Screenheight/2.0f };
-        camera->target = player->position;
-    }*/
+   
     return 0;
 }

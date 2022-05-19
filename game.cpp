@@ -137,6 +137,7 @@ int main(void)
     Vector2 navaPosition = {(float)0, (float)0};
     Vector2 nava_static;
     std::vector<float> asteroids;
+    
     for (float i = -10.5; i <= 10.5; i += 0.5)
     {
         asteroids.push_back(i);
@@ -358,12 +359,14 @@ int main(void)
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
                 lost = false;
+                won = false;
                 lives_no = 3;
                 cooldown = 80;
                 lives_planet = 30;
                 ok = 1;
                 reached = 0;
                 i = 0;
+
                 navaPosition.x=0;
                 navaPosition.y=0;
             }
