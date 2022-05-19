@@ -1,3 +1,19 @@
-# bumbaru
-some c# bs
-but we have una bucata teza la romana
+# Project Title
+
+Gravitas
+
+## Description
+
+Jocul Gravitas, dezvoltat de echipa zenCode are o tematica fascinanta si anume spatiul cosmic. Este un joc interactiv si captivant, ce devine din ce in ce mai dificil odata cu cresterea nivelului.
+
+### Executing program
+
+* How to run the program
+* Step-by-step bullets
+```
+make cleanrun
+```
+```
+make run
+```
+
