@@ -177,6 +177,7 @@ int main(void)
         BeginDrawing();
         if (!lost)
         {
+            
             DrawText(TextFormat("Mouse: %.1f, %.1f", GetMousePosition().x, GetMousePosition().y), 400, 10, 20, RED);
             DrawText(TextFormat("Screen Size: %i, %i", SCREEN_WIDTH, SCREEN_HEIGHT), 400, 30, 20, RED);
             if (IsKeyDown(KEY_D) && navaPosition.x < SCREEN_WIDTH - framewidth_space)
@@ -263,6 +264,11 @@ int main(void)
             DrawTextEx(font, TextFormat("Lives %f", lives_no), Vector2{780, 10}, 30, 1, Color{255, 255, 255, 255});
             DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
             DrawRectangleRounded(Rectangle{750, 100, (230 / 30.0f) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
+            DrawTextEx(font, "W to move up", Vector2{750, 200}, 15, 1, Color{255, 0, 255, 255});
+            DrawTextEx(font, "S to move down", Vector2{750, 250}, 15, 1, Color{255, 0, 255, 255});
+            DrawTextEx(font, "A to move left", Vector2{750, 300}, 15, 1, Color{255, 0, 255, 255});
+            DrawTextEx(font, "D to move right", Vector2{750, 350}, 15, 1, Color{255, 0, 255, 255});
+            DrawTextEx(font, "Left click to shoot", Vector2{750, 380}, 12, 1, Color{255, 0, 255, 255});
             // ui-end
             //--------------------------------------------------------------------------------------
 
@@ -275,7 +281,7 @@ int main(void)
             lives_no = (current_state2 == last_state2) ? lives_no : (float)lives_no - 0.5f;
             last_state2 = current_state2;
 
-            DrawText(TextFormat("%d Collided", spaceship_collision), 700, 200, 20, RED);
+            //DrawText(TextFormat("%d Collided", spaceship_collision), 700, 200, 20, RED);
             current_state = planet_collision;
             // random value between 0 and 1
             float rand1 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;

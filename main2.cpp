@@ -2,7 +2,7 @@
 #include "include/raylib.h"
 #define PHYSAC_IMPLEMENTATION
 #include "include/physac.h"
-
+#include <vector>
 #define Width 1000
 #define Height 1000
 #define limit Height - 200
@@ -104,12 +104,29 @@ void MovePlatform()
             platforms[i]->velocity.y = -0.15 * (float)sin(offset); /// doar pt ce se misca <3
     }
 }
+std::vector<int> v;
+void int_bg()
+{
+    // store random vaues in a vector
+    for (int i = 0; i < 1000; i++)
+    {
+        v.push_back(rand() % 100);
+    }
+}
+void draw_bg()
+{
+    for (int i = 1; i <= 1000; i++)
+    {
+        DrawCircleV(Vector2{(float)(v[i] * 10), (float)(v[i + 1] * 10)}, 2, WHITE);
+    }
+}
 // main loop:
 int main(void)
 {
     InitWindow(Width, Height, "");
     SetTargetFPS(120);
     InitPhysics();
+    int_bg();
     player->freezeOrient = true;
     // arrive->freezeOrient = true;
     for (int i = 0; i < 5; i++)
@@ -125,6 +142,7 @@ int main(void)
     Texture2D planets = LoadTexture("../assets/planets.png");
     while (!WindowShouldClose())
     {
+        draw_bg();
         for (int i = 0; i < 5; i++)
         {
             platforms[i]->velocity.x = 0;
