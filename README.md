@@ -8,8 +8,6 @@ Jocul Gravitas, dezvoltat de echipa zenCode are o tematica fascinanta si anume s
 
 ### Executing program
 
-* How to run the program
-* Step-by-step bullets
 ```
 make cleanrun
 ```
