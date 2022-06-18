@@ -58,23 +58,16 @@ void bullet(Vector2 navaPosition, Vector2 mousePosition)
     Vector2 start_pos = {navaPosition.x, navaPosition.y};
     Vector2 end_pos = {mousePosition.x, mousePosition.y};
     Vector2 poz_3 = Vector2Normalize(Vector2Subtract(end_pos, start_pos));
-
     // print len and offset
-    DrawLineEx(start_pos, Vector2Add(start_pos, poz_3), 10, RED);
-    for (int i = 0; i < 1; i++)
-    {
-        bullets[i].len += l1;
-        //   std::cout << bullets[i].len << " " << bullets[i].offset << std::endl;
-        poz_3.x *= bullets[i].len;
-        poz_3.y *= bullets[i].len;
-        Vector2Normalize(start_pos);
+    DrawLineEx(start_pos, Vector2Add(start_pos, poz_3), 30, RED);
+    bullets[0].len += l1;
+    poz_3.x *= bullets[0].len;
+    poz_3.y *= bullets[0].len;
+    if (ok)
+        DrawCircleV(Vector2Add(start_pos, poz_3), 10, RED);
+    bam = Vector2Add(start_pos, poz_3);
 
-        if (ok)
-            DrawCircleV(Vector2Add(start_pos, poz_3), 10, RED);
-        bam = Vector2Add(start_pos, poz_3);
-
-        // check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},170,Vector2Add(start_pos, poz_3),10);
-    }
+    // check_collided(Vector2{SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},170,Vector2Add(start_pos, poz_3),10);
 }
 bool prssed = 0;
 void planet_boss(Vector2 ship_poz)
@@ -86,7 +79,8 @@ void planet_boss(Vector2 ship_poz)
     poz_3.x *= bullets[1].len;
     poz_3.y *= bullets[1].len;
     Vector2Normalize(start_pos);
-    if(ok2)DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
+    if (ok2)
+        DrawCircleV(Vector2Add(start_pos, poz_3), 10, YELLOW);
     bam2 = Vector2Add(start_pos, poz_3);
 }
 int main(void)
@@ -138,7 +132,7 @@ int main(void)
     Vector2 navaPosition = {(float)10, (float)10};
     Vector2 nava_static;
     std::vector<float> asteroids;
-    
+
     for (float i = -80.5; i <= 80.5; i += 1)
     {
         asteroids.push_back(i);
@@ -179,7 +173,7 @@ int main(void)
         BeginDrawing();
         if (!lost)
         {
-            
+
             DrawText(TextFormat("Mouse: %.1f, %.1f", GetMousePosition().x, GetMousePosition().y), 400, 10, 20, RED);
             DrawText(TextFormat("Screen Size: %i, %i", SCREEN_WIDTH, SCREEN_HEIGHT), 400, 30, 20, RED);
             if (IsKeyDown(KEY_D) && navaPosition.x < SCREEN_WIDTH - framewidth_space)
@@ -263,7 +257,7 @@ int main(void)
             // std::cout << bullets[1].len << " " << frame4 << " " << std::endl;
             //--------------------------------------------------------------------------------------
             // ui
-           // std::cout << asteroids[i] << std::endl;
+            // std::cout << asteroids[i] << std::endl;
             DrawTextEx(font, TextFormat("Lives %f", lives_no), Vector2{780, 10}, 30, 1, Color{255, 255, 255, 255});
             DrawRectangleRoundedLines(Rectangle{750, 100, 230, 50}, 0.7, 4, 4, Color{70, 52, 235, 255});
             DrawRectangleRounded(Rectangle{750, 100, (230 / 30.0f) * (float)lives_planet, 50}, 0.7, 4, Color{70, 52, 235, 255});
@@ -284,16 +278,16 @@ int main(void)
             lives_no = (current_state2 == last_state2) ? lives_no : (float)lives_no - 0.5f;
             last_state2 = current_state2;
 
-            //DrawText(TextFormat("%d Collided", spaceship_collision), 700, 200, 20, RED);
+            // DrawText(TextFormat("%d Collided", spaceship_collision), 700, 200, 20, RED);
             current_state = planet_collision;
             // random value between 0 and 1
             float rand1 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
             float rand2 = (planet_collision) ? (((float)rand() / (float)RAND_MAX) / 1) * (1 - 0.85) + 0.85 : 1;
             lives_planet = (current_state && !last_state) ? lives_planet - 1 : lives_planet, last_state = current_state;
             if (planet_collision)
-                ok = 0,PlaySound(explosion);
-            if(spaceship_collision)
-                ok2 = 0,PlaySound(explosion);
+                ok = 0, PlaySound(explosion);
+            if (spaceship_collision)
+                ok2 = 0, PlaySound(explosion);
             float degrees = calculate_angle(navaPosition);
             // colision&ui-end
             //--------------------------------------------------------------------------------------
@@ -337,7 +331,7 @@ int main(void)
             ClearBackground(GRAY);
             DrawText("You Lost!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
             DrawText("Press enter to replay", SCREEN_WIDTH / 5, SCREEN_HEIGHT / 3.9, 60, RED);
-            if(IsKeyPressed(KEY_ENTER))
+            if (IsKeyPressed(KEY_ENTER))
             {
                 lost = false;
                 lives_no = 5;
@@ -346,8 +340,8 @@ int main(void)
                 ok = 1;
                 reached = 0;
                 i = 0;
-                navaPosition.x=0;
-                navaPosition.y=0;
+                navaPosition.x = 0;
+                navaPosition.y = 0;
             }
         }
         if (lives_planet == 0)
@@ -360,7 +354,7 @@ int main(void)
             ClearBackground(GRAY);
             DrawText("You won!", SCREEN_WIDTH / 3, SCREEN_HEIGHT / 3, 60, RED);
             DrawText("Press enter to replay", SCREEN_WIDTH / 5, SCREEN_HEIGHT / 3.9, 60, RED);
-            if(IsKeyPressed(KEY_ENTER))
+            if (IsKeyPressed(KEY_ENTER))
             {
                 lost = false;
                 won = false;
@@ -370,8 +364,8 @@ int main(void)
                 ok = 1;
                 reached = 0;
                 i = 0;
-                navaPosition.x=0;
-                navaPosition.y=0;
+                navaPosition.x = 0;
+                navaPosition.y = 0;
             }
         }
         // win-lose-end
